@@ -1,0 +1,133 @@
+
+> web@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.10.56.62:3000
+- Environments: .env.local
+✓ Ready in 547ms
+⚠ turbopack.root should be absolute, using: C:\Users\Hena\OpportunityHub\apps
+
+ GET /opportunities 200 in 424ms (next.js: 162ms, application-code: 262ms)
+ GET /dashboard 200 in 100ms (next.js: 36ms, application-code: 65ms)
+ GET /dashboard/profile 200 in 491ms (next.js: 213ms, application-code: 278ms)
+ GET /dashboard/cv 200 in 456ms (next.js: 200ms, application-code: 256ms)
+○ Compiling /dashboard/bookmarks ...
+ GET /dashboard/bookmarks 200 in 3.6s (next.js: 2.9s, application-code: 754ms)
+ GET /dashboard/applications 200 in 2.5s (next.js: 2.1s, application-code: 426ms)
+ GET /dashboard/applications 200 in 262ms (next.js: 77ms, application-code: 185ms)
+ GET / 200 in 349ms (next.js: 199ms, application-code: 150ms)
+ GET / 200 in 549ms (next.js: 33ms, application-code: 516ms)
+ GET /auth/register 200 in 625ms (next.js: 390ms, application-code: 235ms)
+ GET / 200 in 208ms (next.js: 31ms, application-code: 177ms)
+ GET / 200 in 306ms (next.js: 24ms, application-code: 282ms)
+⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.10.56.62:3000
+- Environments: .env.local
+✓ Ready in 2.6s
+⚠ turbopack.root should be absolute, using: C:\Users\Hena\OpportunityHub\apps
+
+✓ Compiled in 3.7s
+ GET / 200 in 5.6s (next.js: 1697ms, application-code: 3.9s)
+ GET / 200 in 677ms (next.js: 336ms, application-code: 342ms)
+ GET / 200 in 501ms (next.js: 202ms, application-code: 299ms)
+ GET / 200 in 1375ms (next.js: 266ms, application-code: 1109ms)
+ GET / 200 in 560ms (next.js: 205ms, application-code: 355ms)
+ GET / 200 in 824ms (next.js: 388ms, application-code: 437ms)
+ GET / 200 in 422ms (next.js: 190ms, application-code: 233ms)
+ GET / 200 in 555ms (next.js: 234ms, application-code: 321ms)
+ GET / 200 in 553ms (next.js: 242ms, application-code: 311ms)
+ GET / 200 in 442ms (next.js: 205ms, application-code: 237ms)
+ GET / 200 in 413ms (next.js: 192ms, application-code: 220ms)
+ GET / 200 in 463ms (next.js: 195ms, application-code: 268ms)
+ GET / 200 in 749ms (next.js: 227ms, application-code: 522ms)
+ GET / 200 in 690ms (next.js: 240ms, application-code: 450ms)
+ GET / 200 in 442ms (next.js: 212ms, application-code: 230ms)
+ GET / 200 in 491ms (next.js: 271ms, application-code: 220ms)
+ GET / 200 in 426ms (next.js: 210ms, application-code: 216ms)
+✓ Compiled in 224ms
+✓ Compiled in 183ms
+ GET / 200 in 1032ms (next.js: 662ms, application-code: 370ms)
+ GET / 200 in 171ms (next.js: 22ms, application-code: 149ms)
+✓ Compiled in 268ms
+ GET / 200 in 924ms (next.js: 311ms, application-code: 613ms)
+ GET / 200 in 401ms (next.js: 25ms, application-code: 376ms)
+ GET / 200 in 181ms (next.js: 25ms, application-code: 156ms)
+✓ Compiled in 350ms
+✓ Compiled in 286ms
+ GET / 200 in 1420ms (next.js: 276ms, application-code: 1144ms)
+ GET / 200 in 958ms (next.js: 25ms, application-code: 933ms)
+ GET / 200 in 766ms (next.js: 171ms, application-code: 595ms)
+ GET / 200 in 774ms (next.js: 33ms, application-code: 741ms)
+ GET / 200 in 770ms (next.js: 325ms, application-code: 445ms)
+ GET / 200 in 772ms (next.js: 458ms, application-code: 314ms)
+ GET / 200 in 176ms (next.js: 26ms, application-code: 150ms)
+[browser] Failed to fetch recommendations after retries: TypeError: Failed to fetch
+    at fetchRecommendations (components/recommendations.tsx:23:11)
+  21 |   async function fetchRecommendations(retries = 2) {
+  22 |     for (let attempt = 0; attempt <= retries; attempt++) {
+> 23 |       try {
+     |           ^
+  24 |         const token = localStorage.getItem("token");
+  25 |         const headers: Record<string, string> = {};
+  26 |         if (token) headers["Authorization"] = `Bearer ${token}`; (components/recommendations.tsx:79:11)
+⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.10.56.62:3000
+- Environments: .env.local
+✓ Ready in 1791ms
+⚠ turbopack.root should be absolute, using: C:\Users\Hena\OpportunityHub\apps
+
+ GET / 200 in 2.3s (next.js: 890ms, application-code: 1384ms)
+ GET /about 404 in 617ms (next.js: 289ms, application-code: 328ms)
+ GET /about 404 in 375ms (next.js: 83ms, application-code: 292ms)
+ GET /contact 404 in 266ms (next.js: 90ms, application-code: 176ms)
+ GET /contact 404 in 427ms (next.js: 40ms, application-code: 387ms)
+ GET /opportunities 200 in 336ms (next.js: 174ms, application-code: 162ms)
+[browser] Failed to fetch opportunities: TypeError: Failed to fetch
+    at request (lib/api.ts:19:26)
+    at Object.get (lib/api.ts:34:5)
+    at fetchOpportunities (app/opportunities/page.tsx:36:30)
+    at OpportunitiesContent.useEffect (app/opportunities/page.tsx:24:21)
+  17 |   }
+  18 |
+> 19 |   const response = await fetch(`${API_URL}${endpoint}`, {
+     |                          ^
+  20 |     ...fetchOptions,
+  21 |     headers,
+  22 |   }); (app/opportunities/page.tsx:40:15)
+[browser] Failed to fetch opportunities: TypeError: Failed to fetch
+    at request (lib/api.ts:19:26)
+    at Object.get (lib/api.ts:34:5)
+    at fetchOpportunities (app/opportunities/page.tsx:36:30)
+    at OpportunitiesContent.useEffect (app/opportunities/page.tsx:24:21)
+  17 |   }
+  18 |
+> 19 |   const response = await fetch(`${API_URL}${endpoint}`, {
+     |                          ^
+  20 |     ...fetchOptions,
+  21 |     headers,
+  22 |   }); (app/opportunities/page.tsx:40:15)
+[browser] Failed to fetch opportunities: TypeError: Failed to fetch
+    at request (lib/api.ts:19:26)
+    at Object.get (lib/api.ts:34:5)
+    at fetchOpportunities (app/opportunities/page.tsx:36:30)
+    at OpportunitiesContent.useEffect (app/opportunities/page.tsx:24:21)
+  17 |   }
+  18 |
+> 19 |   const response = await fetch(`${API_URL}${endpoint}`, {
+     |                          ^
+  20 |     ...fetchOptions,
+  21 |     headers,
+  22 |   }); (app/opportunities/page.tsx:40:15)
+✓ Compiled in 388ms
+ GET /opportunities 200 in 1372ms (next.js: 426ms, application-code: 946ms)
+ GET /opportunities 200 in 590ms (next.js: 23ms, application-code: 567ms)
+ GET /opportunities 200 in 373ms (next.js: 176ms, application-code: 196ms)
+ GET /opportunities 200 in 388ms (next.js: 67ms, application-code: 321ms)
+ GET / 200 in 921ms (next.js: 538ms, application-code: 383ms)
+^C^C

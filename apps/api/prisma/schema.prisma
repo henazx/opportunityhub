@@ -1,0 +1,578 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  MODERATOR
+  ORGANIZATION
+  RECRUITER
+  USER
+}
+
+enum OpportunityType {
+  JOB
+  SCHOLARSHIP
+  INTERNSHIP
+  GRANT
+  COMPETITION
+  TRAINING
+  EVENT
+  VOLUNTEER
+  REMOTE_WORK
+}
+
+enum SourceStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  PENDING
+}
+
+enum CollectorStatus {
+  IDLE
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum NotificationType {
+  IN_APP
+  EMAIL
+  PUSH
+  TELEGRAM
+  SMS
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+enum BookmarkFolder {
+  DEFAULT
+  INTERESTED
+  APPLIED
+  SAVED_LATER
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  IMPORT
+  EXPORT
+  ADMIN_ACTION
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  displayName   String?
+  avatarUrl     String?
+  role          UserRole  @default(USER)
+  emailVerified Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // Relations
+  profile              UserProfile?
+  organizations        OrganizationMember[]
+  bookmarks            Bookmark[]
+  applications         Application[]
+  notifications        Notification[]
+  searchHistory        SearchHistory[]
+  viewHistory          OpportunityView[]
+  auditLogs            AuditLog[]
+  refreshTokens        RefreshToken[]
+  userPreferences      UserPreference?
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model UserProfile {
+  id          String  @id @default(uuid()) @db.Uuid
+  userId      String  @unique @db.Uuid
+  bio         String? @db.Text
+  phone       String?
+  website     String?
+  linkedin    String?
+  github      String?
+  location    String?
+  skills      String[]
+  interests   String[]
+  resumeUrl   String?
+
+  // CV fields
+  education   Json?   // [{institution, degree, field, startDate, endDate, description}]
+  experience  Json?   // [{company, position, startDate, endDate, description, current}]
+  languages   Json?   // [{name, level: "beginner"|"intermediate"|"advanced"|"native"}]
+  certifications Json? // [{name, issuer, date, url}]
+  projects    Json?   // [{name, description, url, technologies}]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ─── Organizations ───────────────────────────────────────────────────────────
+
+model Organization {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  logoUrl     String?
+  website     String?
+  email       String?
+  phone       String?
+  industry    String?
+  size        String?
+  foundedYear Int?
+  location    String?
+  isVerified  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  members    OrganizationMember[]
+  sources    Source[]
+  opportunities Opportunity[]
+
+  @@index([slug])
+  @@index([name])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @db.Uuid
+  organizationId String           @db.Uuid
+  role           UserRole         @default(ORGANIZATION)
+  isOwner        Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@map("organization_members")
+}
+
+// ─── Categories & Tags ──────────────────────────────────────────────────────
+
+model Category {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  parentId    String?  @db.Uuid
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent       Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children     Category[] @relation("CategoryTree")
+  opportunities Opportunity[]
+
+  @@index([slug])
+  @@index([parentId])
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  slug      String   @unique
+  usageCount Int     @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  opportunities OpportunityTag[]
+
+  @@index([slug])
+  @@map("tags")
+}
+
+// ─── Locations ───────────────────────────────────────────────────────────────
+
+model Location {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  slug       String   @unique
+  country    String
+  countryCode String?
+  region     String?
+  city       String?
+  latitude   Float?
+  longitude  Float?
+  isRemote   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  opportunities OpportunityLocation[]
+
+  @@index([slug])
+  @@index([country])
+  @@index([countryCode])
+  @@map("locations")
+}
+
+// ─── Sources & Collectors ───────────────────────────────────────────────────
+
+model Source {
+  id              String         @id @default(uuid()) @db.Uuid
+  name            String
+  url             String
+  description     String?
+  collectorType   String
+  status          SourceStatus   @default(PENDING)
+  frequency       String         @default("daily")
+  lastRunAt       DateTime?
+  lastSuccessAt   DateTime?
+  lastErrorAt     DateTime?
+  lastError       String?        @db.Text
+  totalImported   Int            @default(0)
+  totalFailed     Int            @default(0)
+  config          Json?
+  organizationId  String?        @db.Uuid
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  opportunities  Opportunity[]
+  collectorRuns  CollectorRun[]
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([status])
+  @@index([collectorType])
+  @@index([organizationId])
+  @@map("sources")
+}
+
+model CollectorRun {
+  id          String          @id @default(uuid()) @db.Uuid
+  sourceId    String          @db.Uuid
+  status      CollectorStatus @default(IDLE)
+  startedAt   DateTime        @default(now())
+  completedAt DateTime?
+  duration    Int?
+  itemsFound  Int             @default(0)
+  itemsImported Int           @default(0)
+  itemsFailed Int             @default(0)
+  errors      Json?
+  metadata    Json?
+
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId])
+  @@index([status])
+  @@map("collector_runs")
+}
+
+// ─── Opportunities (Core Entity) ────────────────────────────────────────────
+
+model Opportunity {
+  id              String          @id @default(uuid()) @db.Uuid
+  title           String
+  slug            String          @unique
+  description     String          @db.Text
+  summary         String?         @db.Text
+  type            OpportunityType
+  url             String?
+  applicationUrl  String?
+  applicationDeadline DateTime?
+  startDate       DateTime?
+  endDate         DateTime?
+  salaryMin       Int?
+  salaryMax       Int?
+  salaryCurrency  String?
+  isRemote        Boolean         @default(false)
+  isFeatured      Boolean         @default(false)
+  isActive        Boolean         @default(true)
+  viewCount       Int             @default(0)
+  applyCount      Int             @default(0)
+  sourceId        String          @db.Uuid
+  organizationId  String?         @db.Uuid
+  categoryId      String?         @db.Uuid
+
+  // Validation & Scoring
+  linkStatus      String?         // valid, broken, timeout, unknown
+  lastLinkCheck   DateTime?
+  linkResponseCode Int?
+  trustScore      Int?            @default(0)  // 0-100
+  qualityScore    Int?            @default(0)  // 0-100
+  overallRank     Int?            @default(0)  // computed rank
+  imageUrl        String?         // photo for the opportunity card
+
+  importedAt      DateTime        @default(now())
+  lastCheckedAt   DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+
+  // Relations
+  source         Source              @relation(fields: [sourceId], references: [id])
+  organization   Organization?       @relation(fields: [organizationId], references: [id])
+  category       Category?           @relation(fields: [categoryId], references: [id])
+  tags           OpportunityTag[]
+  locations      OpportunityLocation[]
+  bookmarks      Bookmark[]
+  applications   Application[]
+  viewHistory    OpportunityView[]
+
+  @@index([type])
+  @@index([slug])
+  @@index([sourceId])
+  @@index([organizationId])
+  @@index([categoryId])
+  @@index([applicationDeadline])
+  @@index([isFeatured])
+  @@index([isActive])
+  @@index([trustScore])
+  @@index([overallRank])
+  @@index([importedAt])
+  @@map("opportunities")
+}
+
+model OpportunityTag {
+  id            String @id @default(uuid()) @db.Uuid
+  opportunityId String @db.Uuid
+  tagId         String @db.Uuid
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  tag         Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, tagId])
+  @@index([tagId])
+  @@map("opportunity_tags")
+}
+
+model OpportunityLocation {
+  id            String @id @default(uuid()) @db.Uuid
+  opportunityId String @db.Uuid
+  locationId    String @db.Uuid
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  location    Location    @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, locationId])
+  @@index([locationId])
+  @@map("opportunity_locations")
+}
+
+model OpportunityView {
+  id            String   @id @default(uuid()) @db.Uuid
+  opportunityId String   @db.Uuid
+  userId        String?  @db.Uuid
+  ipAddress     String?
+  userAgent     String?
+  viewedAt      DateTime @default(now())
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([opportunityId])
+  @@index([userId])
+  @@map("opportunity_views")
+}
+
+// ─── Bookmarks ───────────────────────────────────────────────────────────────
+
+model Bookmark {
+  id            String         @id @default(uuid()) @db.Uuid
+  userId        String         @db.Uuid
+  opportunityId String         @db.Uuid
+  folder        BookmarkFolder @default(DEFAULT)
+  notes         String?        @db.Text
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, opportunityId])
+  @@index([userId])
+  @@index([opportunityId])
+  @@index([folder])
+  @@map("bookmarks")
+}
+
+// ─── Applications ────────────────────────────────────────────────────────────
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  INTERVIEWING
+  OFFERED
+  REJECTED
+  ACCEPTED
+  WITHDRAWN
+}
+
+model Application {
+  id            String            @id @default(uuid()) @db.Uuid
+  userId        String            @db.Uuid
+  opportunityId String            @db.Uuid
+  status        ApplicationStatus @default(SAVED)
+  notes         String?           @db.Text
+  appliedAt     DateTime?
+  interviewAt   DateTime?
+  responseAt    DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, opportunityId])
+  @@index([userId])
+  @@index([opportunityId])
+  @@index([status])
+  @@map("applications")
+}
+
+// ─── Search ──────────────────────────────────────────────────────────────────
+
+model SearchHistory {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  query     String
+  filters   Json?
+  resultCount Int    @default(0)
+  searchedAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([query])
+  @@map("search_history")
+}
+
+// ─── Notifications ──────────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  type      NotificationType @default(IN_APP)
+  title     String
+  message   String           @db.Text
+  link      String?
+  status    NotificationStatus @default(UNREAD)
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  readAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ─── User Preferences ───────────────────────────────────────────────────────
+
+model UserPreference {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @unique @db.Uuid
+  emailNotifications Boolean @default(true)
+  pushNotifications  Boolean @default(true)
+  preferredTypes    String[]
+  preferredLocations String[]
+  preferredCategories String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+// ─── Audit Logs ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id             String      @id @default(uuid()) @db.Uuid
+  userId         String?     @db.Uuid
+  action         AuditAction
+  entity         String
+  entityId       String?
+  oldValues      Json?
+  newValues      Json?
+  ipAddress      String?
+  userAgent      String?
+  metadata       Json?
+  createdAt      DateTime    @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─── Settings ────────────────────────────────────────────────────────────────
+
+model SystemSetting {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String   @unique
+  value     Json
+  category  String   @default("general")
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([category])
+  @@map("system_settings")
+}

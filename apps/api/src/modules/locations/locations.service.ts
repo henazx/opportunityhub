@@ -59,7 +59,7 @@ export class LocationsService {
       orderBy: { country: 'asc' },
     });
 
-    return countries.map((c) => ({
+    return countries.map((c: any) => ({
       country: c.country,
       count: c._count.id,
     }));

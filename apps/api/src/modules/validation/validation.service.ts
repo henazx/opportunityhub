@@ -114,7 +114,7 @@ export class ValidationService {
     for (let i = 0; i < opportunities.length; i += 5) {
       const batch = opportunities.slice(i, i + 5);
       const results = await Promise.all(
-        batch.map(opp => this.validateOpportunity(opp.id).catch(() => null))
+        batch.map((opp: any) => this.validateOpportunity(opp.id).catch(() => null))
       );
 
       for (const result of results) {
@@ -203,7 +203,7 @@ export class ValidationService {
 
     return {
       stats: { expired, expiringSoon, expiringThisWeek, expiringThisMonth, noDeadline },
-      urgentDeadlines: urgentDeadlines.map(opp => ({
+      urgentDeadlines: urgentDeadlines.map((opp: any) => ({
         ...opp,
         daysLeft: opp.applicationDeadline
           ? Math.max(0, Math.ceil((opp.applicationDeadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
@@ -317,13 +317,13 @@ export class ValidationService {
 
       // Extract user preferences
       const preferredCategories = [...new Set([
-        ...bookmarks.map(b => b.opportunity.categoryId).filter(Boolean),
-        ...views.map(v => v.opportunity.categoryId).filter(Boolean),
+        ...bookmarks.map((b: any) => b.opportunity.categoryId).filter(Boolean),
+        ...views.map((v: any) => v.opportunity.categoryId).filter(Boolean),
       ])].slice(0, 3);
 
       const preferredTypes = [...new Set([
-        ...bookmarks.map(b => b.opportunity.type),
-        ...views.map(v => v.opportunity.type),
+        ...bookmarks.map((b: any) => b.opportunity.type),
+        ...views.map((v: any) => v.opportunity.type),
       ])].slice(0, 3);
 
       if (preferredCategories.length > 0 || preferredTypes.length > 0) {
@@ -355,7 +355,7 @@ export class ValidationService {
     return {
       topRanked,
       freshOpps,
-      deadlineOpps: deadlineOpps.map(opp => ({
+      deadlineOpps: deadlineOpps.map((opp: any) => ({
         ...opp,
         daysLeft: opp.applicationDeadline
           ? Math.max(0, Math.ceil((opp.applicationDeadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))

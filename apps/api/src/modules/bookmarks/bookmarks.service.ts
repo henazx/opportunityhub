@@ -123,7 +123,7 @@ export class BookmarksService {
       _count: { id: true },
     });
 
-    return folders.map((f) => ({
+    return folders.map((f: any) => ({
       folder: f.folder,
       count: f._count.id,
     }));

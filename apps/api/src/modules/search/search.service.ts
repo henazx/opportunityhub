@@ -110,7 +110,7 @@ export class SearchService {
       take: 10,
     });
 
-    return searches.map((s) => ({
+    return searches.map((s: any) => ({
       query: s.query,
       count: s._count.query,
     }));

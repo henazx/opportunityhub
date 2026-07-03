@@ -281,7 +281,7 @@ export class OpportunitiesService {
 
     return {
       total,
-      byType: byType.map((item) => ({
+      byType: byType.map((item: any) => ({
         type: item.type,
         count: item._count.id,
       })),

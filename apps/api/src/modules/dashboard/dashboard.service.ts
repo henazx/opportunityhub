@@ -58,7 +58,7 @@ export class DashboardService {
         totalUsers,
       },
       recentOpportunities,
-      opportunitiesByType: opportunitiesByType.map((item) => ({
+      opportunitiesByType: opportunitiesByType.map((item: any) => ({
         type: item.type,
         count: item._count.id,
       })),

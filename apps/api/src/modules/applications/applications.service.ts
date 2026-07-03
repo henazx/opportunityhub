@@ -134,7 +134,7 @@ export class ApplicationsService {
       _count: { id: true },
     });
 
-    return statuses.map((s) => ({
+    return statuses.map((s: any) => ({
       status: s.status,
       count: s._count.id,
     }));

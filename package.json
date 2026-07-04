@@ -19,6 +19,8 @@
     "db:reset": "cd apps/api && npx prisma migrate reset",
     "api:dev": "cd apps/api && npm run dev",
     "web:dev": "cd apps/web && npm run dev",
+    "web:build": "cd apps/web && npx next build",
+    "web:start": "cd apps/web && npx next start",
     "shared:build": "cd packages/shared && npm run build",
     "install:all": "npm install"
   },

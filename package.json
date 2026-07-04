@@ -19,8 +19,8 @@
     "db:reset": "cd apps/api && npx prisma migrate reset",
     "api:dev": "cd apps/api && npm run dev",
     "web:dev": "cd apps/web && npm run dev",
-    "web:build": "cd apps/web && npm install next@16.2.9 react@19.2.4 react-dom@19.2.4 --save --install-links && ./node_modules/.bin/next build",
-    "web:start": "cd apps/web && ./node_modules/.bin/next start",
+    "web:build": "cd apps/web && npm install next@16.2.9 react@19.2.4 react-dom@19.2.4 --save --install-links && node node_modules/next/dist/bin/next build",
+    "web:start": "cd apps/web && node node_modules/next/dist/bin/next start",
     "shared:build": "cd packages/shared && npm run build",
     "install:all": "npm install"
   },

@@ -1,4 +1,4 @@
-import { OpportunityType } from '@prisma/client';
+export type OpportunityType = 'JOB' | 'SCHOLARSHIP' | 'INTERNSHIP' | 'GRANT' | 'COMPETITION' | 'TRAINING' | 'EVENT' | 'VOLUNTEER' | 'REMOTE_WORK';
 
 export interface Opportunity {
   id: string;

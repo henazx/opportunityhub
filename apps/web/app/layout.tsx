@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { VisitorTracker } from "@/components/visitor-tracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -86,6 +87,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
+        <VisitorTracker />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

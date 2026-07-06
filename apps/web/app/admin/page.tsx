@@ -31,12 +31,23 @@ interface Stats {
   recentAuditLogs: any[];
 }
 
+interface VisitorStats {
+  totalPageViews: number;
+  todayPageViews: number;
+  thisWeekPageViews: number;
+  thisMonthPageViews: number;
+  uniqueVisitors: number;
+  topPages: { path: string; _count: { id: number } }[];
+  visitorsByDay: { date: string; count: number }[];
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [visitorStats, setVisitorStats] = useState<VisitorStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "audit">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "visitors" | "users" | "audit">("overview");
   const [users, setUsers] = useState<any[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -50,6 +61,7 @@ export default function AdminPage() {
       return;
     }
     fetchStats(token);
+    fetchVisitorStats(token);
   }, []);
 
   async function fetchStats(token: string) {
@@ -63,6 +75,19 @@ export default function AdminPage() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchVisitorStats(token: string) {
+    try {
+      const res = await fetch(`${API_URL}/analytics/visitors`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setVisitorStats(await res.json());
+      }
+    } catch {
+      // Silent fail
     }
   }
 
@@ -96,11 +121,12 @@ export default function AdminPage() {
     }
   }
 
-  function handleTabChange(tab: "overview" | "users" | "audit") {
+  function handleTabChange(tab: "overview" | "visitors" | "users" | "audit") {
     setActiveTab(tab);
     const token = localStorage.getItem("token")!;
     if (tab === "users" && users.length === 0) fetchUsers(token);
     if (tab === "audit" && auditLogs.length === 0) fetchAuditLogs(token);
+    if (tab === "visitors" && !visitorStats) fetchVisitorStats(token);
   }
 
   if (loading) {
@@ -141,7 +167,7 @@ export default function AdminPage() {
       )}
 
       <div className="mb-6 flex gap-1 rounded-lg border border-border bg-gray-50 p-1">
-        {(["overview", "users", "audit"] as const).map((tab) => (
+        {(["overview", "visitors", "users", "audit"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => handleTabChange(tab)}
@@ -149,18 +175,19 @@ export default function AdminPage() {
               activeTab === tab ? "bg-white text-foreground shadow-sm" : "text-muted hover:text-foreground"
             }`}
           >
-            {tab === "overview" ? "Overview" : tab === "users" ? "Users" : "Audit Logs"}
+            {tab === "overview" ? "Overview" : tab === "visitors" ? "Visitors" : tab === "users" ? "Users" : "Audit Logs"}
           </button>
         ))}
       </div>
 
       {activeTab === "overview" && stats && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-8">
             <StatCard title="Total Opportunities" value={stats.opportunities.total} icon="📋" color="bg-blue-500" />
             <StatCard title="Total Users" value={stats.users.total} icon="👥" color="bg-green-500" />
             <StatCard title="Organizations" value={stats.organizations.total} icon="🏢" color="bg-purple-500" />
             <StatCard title="Bookmarks" value={stats.bookmarks.total} icon="🔖" color="bg-yellow-500" />
+            <StatCard title="Page Views" value={visitorStats?.totalPageViews || 0} icon="👁️" color="bg-pink-500" />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2 mb-8">
@@ -231,6 +258,67 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+        </>
+      )}
+
+      {activeTab === "visitors" && (
+        <>
+          {visitorStats && (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-8">
+                <StatCard title="Total Page Views" value={visitorStats.totalPageViews} icon="📊" color="bg-blue-500" />
+                <StatCard title="Today" value={visitorStats.todayPageViews} icon="📅" color="bg-green-500" />
+                <StatCard title="This Week" value={visitorStats.thisWeekPageViews} icon="📈" color="bg-purple-500" />
+                <StatCard title="This Month" value={visitorStats.thisMonthPageViews} icon="📆" color="bg-yellow-500" />
+                <StatCard title="Unique Visitors" value={visitorStats.uniqueVisitors} icon="👤" color="bg-pink-500" />
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2 mb-8">
+                <div className="rounded-xl border border-border bg-white p-6">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Top Pages</h3>
+                  <div className="space-y-3">
+                    {visitorStats.topPages.length === 0 ? (
+                      <p className="text-muted text-sm">No page views yet</p>
+                    ) : (
+                      visitorStats.topPages.map((page) => (
+                        <div key={page.path} className="flex items-center justify-between">
+                          <span className="text-sm font-mono text-foreground truncate flex-1 mr-4">{page.path}</span>
+                          <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">{page._count.id}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-border bg-white p-6">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Views by Day (Last 7 Days)</h3>
+                  {visitorStats.visitorsByDay.length === 0 ? (
+                    <p className="text-muted text-sm">No data yet</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {visitorStats.visitorsByDay.map((day) => {
+                        const maxDay = Math.max(...visitorStats.visitorsByDay.map((d) => d.count));
+                        return (
+                          <div key={day.date}>
+                            <div className="flex items-center justify-between text-sm mb-1">
+                              <span className="text-foreground">{new Date(day.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</span>
+                              <span className="text-muted">{day.count} views</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-primary"
+                                style={{ width: `${(day.count / maxDay) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </>
       )}
 

@@ -59,6 +59,11 @@ export function Header() {
               Dashboard
             </Link>
           )}
+          {user?.role === "ADMIN" && (
+            <Link href="/admin" className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
+              Admin
+            </Link>
+          )}
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
@@ -100,6 +105,11 @@ export function Header() {
                       <Link href="/dashboard/applications" className="flex items-center gap-2 px-4 py-2 text-sm text-muted hover:bg-gray-50 hover:text-foreground" onClick={() => setDropdownOpen(false)}>
                         📋 Applications
                       </Link>
+                      {user?.role === "ADMIN" && (
+                        <Link href="/admin" className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50" onClick={() => setDropdownOpen(false)}>
+                          ⚙️ Admin Dashboard
+                        </Link>
+                      )}
                     </div>
                     <div className="border-t border-border py-1">
                       <button

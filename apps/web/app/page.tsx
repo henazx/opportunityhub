@@ -107,7 +107,7 @@ export default function HomePage() {
         {/* Ethiopian photo background */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=1600&h=900&fit=crop"
+            src="https://images.unsplash.com/photo-1771495604392-2008757fb32a?w=1600&h=900&fit=crop"
             alt=""
             className="h-full w-full object-cover"
           />
@@ -200,7 +200,7 @@ export default function HomePage() {
                 icon: "🔍",
                 title: "Link Validation",
                 description: "Every application link is automatically checked. We tell you if it works before you click.",
-                image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=250&fit=crop",
+                image: "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=400&h=250&fit=crop",
               },
               {
                 icon: "🏆",
@@ -230,7 +230,7 @@ export default function HomePage() {
                 icon: "🇪🇹",
                 title: "Built for Ethiopia",
                 description: "Curated from Ethiopian companies, NGOs, government, and international organizations.",
-                image: "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=400&h=250&fit=crop",
+                image: "https://images.unsplash.com/photo-1771495604392-2008757fb32a?w=400&h=250&fit=crop",
               },
             ].map((item) => (
               <div key={item.title} className="rounded-xl border border-border bg-white overflow-hidden hover:shadow-md transition-shadow">
@@ -254,7 +254,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="relative rounded-2xl overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&h=500&fit=crop"
+              src="https://images.unsplash.com/photo-1756721306784-b05ad62d7e3c?w=1200&h=500&fit=crop"
               alt=""
               className="absolute inset-0 h-full w-full object-cover"
             />
